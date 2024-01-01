@@ -211,26 +211,43 @@
     <div id="form-container">
         <form action="https://sheetdb.io/api/v1/t3cvwiwrjcb4b" method="post" id="sheetdb-form">
             <!-- Sample input fields in your HTML -->
-            <label for="firstName">First Name:</label>
-            <input type="text" id="firstName" name="firstName" required>
 
-            <label for="lastName">Last Name:</label>
-            <input type="text" id="lastName" name="lastName" required>
-
-            <label>Departments:</label>
-            <div class="checkbox-group">
-                <input type="checkbox" id="Info" name="department" value="Info" onchange="updateDepartments();">
-                <label for="Info">Information Technology</label>
-
-                <input type="checkbox" id="Physic" name="department" value="Physic" onchange="updateDepartments();">
-                <label for="Physic">Physics</label>
-
-                <input type="checkbox" id="Bio" name="department" value="Bio" onchange="updateDepartments();">
-                <label for="Bio">Biology</label>
+            <div>
+                <label for="firstName">Prenom:</label>
+                <input type="text" id="firstName" name="firstName" required>
             </div>
-
+            <div>
+                <label for="lastName">Nom:</label>
+                <input type="text" id="lastName" name="lastName" required>
+            </div>
+            <div>
+                <label for="email">Email:</label>
+                <input type="text" id="email" name="email" required>
+            </div>
+            <div>
+                <label for="Numero de telephone">Email:</label>
+                <input type="tel" id="tel" name="tel" required>
+            </div>
+            <div>
+                <label>Departements:</label>
+                <div class="checkbox-group">
+                    <div>
+                        <input type="checkbox" id="Info" name="department" value="Info" onchange="updateDepartments();">
+                        <label for="Info">Information Technology</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="Physic" name="department" value="Physic"
+                            onchange="updateDepartments();">
+                        <label for="Physic">Physics</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="Bio" name="department" value="Bio" onchange="updateDepartments();">
+                        <label for="Bio">Biology</label>
+                    </div>
+                </div>
+            </div>
             <div id="major-container">
-                <label>Majors:</label>
+                <label>Filiere:</label>
                 <div id="major-checkboxes"></div>
             </div>
 
