@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Your existing styles here */
+    </style>
+    <script>
+        var majorCourses = {
+            'Info': {
+                'Web Development': ['Course 1', 'Course 2', 'Course 3'],
+                'Database Management': ['Course 4', 'Course 5', 'Course 6'],
+                'Network Security': ['Course 7', 'Course 8', 'Course 9']
+            },
+            'Physic': {
+                'Quantum Mechanics': ['Course 10', 'Course 11', 'Course 12'],
+                'Thermodynamics': ['Course 13', 'Course 14', 'Course 15'],
+                'Astrophysics': ['Course 16', 'Course 17', 'Course 18']
+            },
+            'Bio': {
+                'Cell Biology': ['Course 19', 'Course 20', 'Course 21'],
+                'Genetics': ['Course 22', 'Course 23', 'Course 24'],
+                'Ecology': ['Course 25', 'Course 26', 'Course 27']
+            }
+        };
+
+        var selectedDepartments = [];
+        var selectedMajors = [];
+
+        function updateDepartments() {
+            var departmentCheckboxes = document.getElementsByName('department');
+            var majorContainer = document.getElementById('major-container');
+            var majorCheckboxes = document.getElementById('major-checkboxes');
+
+            // Get selected departments
+            selectedDepartments = Array.from(departmentCheckboxes)
+                .filter(checkbox => checkbox.checked)
+                .map(checkbox => checkbox.value);
+
+            // Show majors if at least one department is selected, hide otherwise
+            majorContainer.style.display = selectedDepartments.length > 0 ? 'block' : 'none';
+
+            // Clear previous majors
+            majorCheckboxes.innerHTML = '';
+
+            // Populate majors based on selected departments
+            selectedDepartments.forEach(department => {
+                var majors = Object.keys(majorCourses[department]);
+                majors.forEach(major => {
+                    var checkbox = createCheckbox('major', major, updateCourses);
+                    majorCheckboxes.appendChild(checkbox);
+                });
+            });
+
+            // Trigger updateCourses when departments change to handle edge cases
+            updateCourses();
+        }
+
+        function createCheckbox(name, value, onchange) {
+            var checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.id = value;
+            checkbox.name = name;
+            checkbox.value = value;
+            checkbox.onchange = onchange;
+
+            var label = document.createElement('label');
+            label.htmlFor = value;
+            label.appendChild(document.createTextNode(value));
+
+            var div = document.createElement('div');
+            div.appendChild(checkbox);
+            div.appendChild(label);
+
+            return div;
+        }
+
+        function updateCourses() {
+            var majorCheckboxes = document.getElementsByName('major');
+            var courseCheckboxContainer = document.getElementById('course-checkboxes');
+            var resultDiv = document.getElementById('result');
+
+            // Get selected majors
+            selectedMajors = Array.from(majorCheckboxes)
+                .filter(checkbox => checkbox.checked)
+                .map(checkbox => checkbox.value);
+
+            // Validate at least one department is selected
+            if (selectedDepartments.length === 0) {
+                alert('Please select at least one department.');
+                return;
+            }
+
+            // Clear previous results and course checkboxes
+            resultDiv.innerHTML = '';
+            courseCheckboxContainer.innerHTML = '';
+
+            // Display the result
+            resultDiv.innerHTML = 'Selected Departments: ' + selectedDepartments.join(', ') +
+                '<br>Selected Majors: ' + selectedMajors.join(', ');
+
+            // Display course checkboxes for all selected majors
+            if (selectedMajors.length > 0) {
+                courseCheckboxContainer.style.display = 'block';
+
+                // Combine courses from all selected majors
+                var allCourses = [];
+                selectedDepartments.forEach(department => {
+                    selectedMajors.forEach(major => {
+                        if (majorCourses[department].hasOwnProperty(major)) {
+                            var courses = majorCourses[department][major];
+                            allCourses.push(...courses);
+                        }
+                    });
+                });
+
+                allCourses.forEach(course => {
+                    var checkbox = createCheckbox('course', course);
+                    var numberOfGroupsInput = createNumberInput('groups_' + course, 'Number of Groups');
+                    var orderChoiceInput = createNumberInput('order_' + course, 'Order of Choice');
+
+                    var div = document.createElement('div');
+                    div.appendChild(checkbox);
+                    div.appendChild(numberOfGroupsInput);
+                    div.appendChild(orderChoiceInput);
+
+                    courseCheckboxContainer.appendChild(div);
+                });
+            } else {
+                courseCheckboxContainer.style.display = 'none';
+            }
+        }
+
+        function createNumberInput(id, placeholder) {
+            var input = document.createElement('input');
+            input.type = 'number';
+            input.id = id;
+            input.name = id;
+            input.placeholder = placeholder;
+
+            return input;
+        }
+
+        function submitForm() {
+            // Get form data
+            var formData = {
+                courses: Array.from(document.getElementsByName('course'))
+                    .filter(checkbox => checkbox.checked)
+                    .map(checkbox => {
+                        var courseInfo = {
+                            firstName: document.getElementById('firstName').value,
+                            lastName: document.getElementById('lastName').value,
+                            department: getDepartmentForCourse(checkbox.value),
+                            major: getMajorForCourse(checkbox.value),
+                            course: checkbox.value,
+                            numberOfGroups: document.getElementById('groups_' + checkbox.value).value,
+                            orderOfChoice: document.getElementById('order_' + checkbox.value).value,
+                        };
+                        return courseInfo;
+                    }),
+            };
+            console.log(formData);
+
+            fetch('https://sheetdb.io/api/v1/t3cvwiwrjcb4b', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData.courses),
+            })
+                .then(response => response.text())
+                .then(data => {
+                    console.log(data);
+                    alert("good");
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // Handle error, if needed
+                });
+        }
+
+        function getDepartmentForCourse(course) {
+            for (const department in majorCourses) {
+                for (const major in majorCourses[department]) {
+                    if (majorCourses[department][major].includes(course)) {
+                        return department;
+                    }
+                }
+            }
+            return null;
+        }
+
+        function getMajorForCourse(course) {
+            for (const department in majorCourses) {
+                for (const major in majorCourses[department]) {
+                    if (majorCourses[department][major].includes(course)) {
+                        return major;
+                    }
+                }
+            }
+            return null;
+        }
+
+
+    </script>
+</head>
+
+<body>
+    <div id="form-container">
+        <form action="https://sheetdb.io/api/v1/t3cvwiwrjcb4b" method="post" id="sheetdb-form">
+            <!-- Sample input fields in your HTML -->
+            <label for="firstName">First Name:</label>
+            <input type="text" id="firstName" name="firstName" required>
+
+            <label for="lastName">Last Name:</label>
+            <input type="text" id="lastName" name="lastName" required>
+
+            <label>Departments:</label>
+            <div class="checkbox-group">
+                <input type="checkbox" id="Info" name="department" value="Info" onchange="updateDepartments();">
+                <label for="Info">Information Technology</label>
+
+                <input type="checkbox" id="Physic" name="department" value="Physic" onchange="updateDepartments();">
+                <label for="Physic">Physics</label>
+
+                <input type="checkbox" id="Bio" name="department" value="Bio" onchange="updateDepartments();">
+                <label for="Bio">Biology</label>
+            </div>
+
+            <div id="major-container">
+                <label>Majors:</label>
+                <div id="major-checkboxes"></div>
+            </div>
+
+            <div class="course-checkboxes" id="course-checkboxes"></div>
+
+            <div id="result"></div>
+
+            <div class="button-container">
+                <button type="button" onclick="submitForm()">Submit</button>
+            </div>
+        </form>
+    </div>
+</body>
+
+</html>
